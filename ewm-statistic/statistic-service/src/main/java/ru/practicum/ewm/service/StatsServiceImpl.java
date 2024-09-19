@@ -18,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StatsServiceImpl implements StatsService {
     private final StatsRepository statsRepository;
+
     @Override
     @Transactional
     public EndpointHitDto saveHit(EndpointHitCreateDto endpointHitCreateDto) {
