@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import ru.practicum.ewm.dto.EndpointHitCreateDto;
 import ru.practicum.ewm.dto.ViewStatsDto;
@@ -16,6 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class StatsClient {
     private final RestClient restClient;
 

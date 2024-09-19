@@ -23,8 +23,8 @@
     <dependencies>
         <dependency>
             <groupId>ru.practicum.ewm</groupId>
-            <artifactId>statistic-dto</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>statistic-client</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -45,6 +45,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.practicum.ewm</groupId>
+            <artifactId>statistic-dto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

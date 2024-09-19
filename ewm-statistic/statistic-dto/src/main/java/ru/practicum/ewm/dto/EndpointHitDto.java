@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 public class EndpointHitDto {
     Long id;
     @NotBlank
