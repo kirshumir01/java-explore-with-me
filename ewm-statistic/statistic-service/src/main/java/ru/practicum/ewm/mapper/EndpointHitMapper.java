@@ -9,7 +9,6 @@ import ru.practicum.ewm.model.EndpointHit;
 public class EndpointHitMapper {
     public static EndpointHit toEndpointHit(EndpointHitCreateDto endpointHitCreateDto) {
         return EndpointHit.builder()
-                .id(endpointHitCreateDto.getId())
                 .app(endpointHitCreateDto.getApp())
                 .uri(endpointHitCreateDto.getUri())
                 .ip(endpointHitCreateDto.getIp())

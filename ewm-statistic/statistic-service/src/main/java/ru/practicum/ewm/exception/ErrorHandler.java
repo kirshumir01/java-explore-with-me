@@ -9,9 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
+import java.io.StringWriter;
 import java.util.MissingFormatArgumentException;
 
 @Slf4j
@@ -26,24 +25,25 @@ public class ErrorHandler {
 
 
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
-    public ErrorResponse handleMethodArgumentNotValidException(final Exception e) {
+    public ApiError handleMethodArgumentNotValidException(final Exception e) {
         log.error(e.getMessage());
-        return new ErrorResponse("Data is not valid", e.getMessage());
+        return new ApiError(HttpStatus.BAD_REQUEST, "Validation exception occurred - invalid arguments: {}", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
-    public ErrorResponse handleBadRequest(final BadRequestException e) {
+    public ApiError handleBadRequest(final BadRequestException e) {
         log.error(e.getMessage());
-        return new ErrorResponse("Bad request error", e.getMessage());
+        return new ApiError(HttpStatus.BAD_REQUEST, "Bad request exception occurred: {}", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) // 500
-    public ErrorResponse handleThrowable(final Exception e) {
-        log.error(e.getMessage());
-        final ByteArrayOutputStream out = new ByteArrayOutputStream();
-        e.printStackTrace(new PrintWriter(out, true, StandardCharsets.UTF_8));
-        return new ErrorResponse("Internal server error", e.getMessage());
+    public ApiError handleThrowable(final Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        log.error(sw.toString());
+        return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error occurred: {}", sw.toString());
     }
 }

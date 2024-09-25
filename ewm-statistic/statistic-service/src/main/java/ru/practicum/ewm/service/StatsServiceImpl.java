@@ -2,13 +2,10 @@ package ru.practicum.ewm.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.dto.EndpointHitCreateDto;
-import ru.practicum.ewm.dto.EndpointHitDto;
 import ru.practicum.ewm.dto.ViewStatsDto;
 import ru.practicum.ewm.exception.BadRequestException;
 import ru.practicum.ewm.mapper.EndpointHitMapper;
-import ru.practicum.ewm.model.EndpointHit;
 import ru.practicum.ewm.repository.StatsRepository;
 
 import java.time.LocalDateTime;
@@ -20,14 +17,11 @@ public class StatsServiceImpl implements StatsService {
     private final StatsRepository statsRepository;
 
     @Override
-    @Transactional
-    public EndpointHitDto saveHit(EndpointHitCreateDto endpointHitCreateDto) {
-        EndpointHit endpointHit = statsRepository.save(EndpointHitMapper.toEndpointHit(endpointHitCreateDto));
-        return EndpointHitMapper.toEndpointHitDto(endpointHit);
+    public void saveHit(EndpointHitCreateDto endpointHitCreateDto) {
+        statsRepository.save(EndpointHitMapper.toEndpointHit(endpointHitCreateDto));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
 
         if (start.isAfter(end)) {

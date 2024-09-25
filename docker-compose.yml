@@ -1,6 +1,6 @@
 version: '3.1'
 services:
-  stats-server:
+  statistic-service:
     build: ./ewm-statistic/statistic-service
     image: statistic-service
     container_name: statistic-service
@@ -10,19 +10,19 @@ services:
       stats-db:
         condition: service_healthy
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm
-      - SPRING_DATASOURCE_USERNAME=ewm
-      - SPRING_DATASOURCE_PASSWORD=ewm
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
+      - SPRING_DATASOURCE_USERNAME=stats
+      - SPRING_DATASOURCE_PASSWORD=stats
 
   stats-db:
-    image: postgres:14-alpine
-    container_name: postgres
+    image: postgres:16.1
+    container_name: stats-db
     ports:
       - "6432:5432"
     environment:
-      - POSTGRES_DB=ewm
-      - POSTGRES_USER=ewm
-      - POSTGRES_PASSWORD=ewm
+      - POSTGRES_DB=stats
+      - POSTGRES_USER=stats
+      - POSTGRES_PASSWORD=stats
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 60s
@@ -36,19 +36,18 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      ewm-db:
+      main-db:
         condition: service_healthy
     environment:
-      - STATSCLIENT_URL=http://statistic-service:9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5431/main
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://main-db:5432/main
       - SPRING_DATASOURCE_USERNAME=main
       - SPRING_DATASOURCE_PASSWORD=main
 
-  ewm-db:
-    image: postgres:14-alpine
-    container_name: postgres-main
+  main-db:
+    image: postgres:16.1
+    container_name: main-db
     ports:
-      - "6431:5431"
+      - "7432:5432"
     environment:
       - POSTGRES_DB=main
       - POSTGRES_USER=main
