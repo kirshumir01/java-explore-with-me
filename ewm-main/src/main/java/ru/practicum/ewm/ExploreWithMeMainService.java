@@ -51,7 +51,7 @@ public class ExploreWithMeMainService {
         System.out.println("Unique stats: " + uniqueStats.size());
     }
 
-    private ClientHttpRequestFactory getClientHttpRequestFactory() {
+    private static ClientHttpRequestFactory getClientHttpRequestFactory() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setReadTimeout(10000);
         factory.setConnectTimeout(10000);
