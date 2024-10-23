@@ -14,25 +14,25 @@ import java.util.List;
 public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
 
     @Query("""
-            SELECT NEW ru.practicum.ewm.dto.ViewStatsDto(eh.app, eh.uri, COUNT(eh.uri))
+            SELECT NEW ru.practicum.ewm.dto.ViewStatsDto(eh.app, eh.uri, COUNT(eh.ip))
             FROM EndpointHit AS eh
             WHERE eh.uri IN (:uris) AND eh.timestamp BETWEEN :start AND :end
             GROUP BY eh.app, eh.uri
-            ORDER BY COUNT(eh.uri) DESC
+            ORDER BY COUNT(eh.ip) DESC
             """)
     List<ViewStatsDto> findAllHitsWithUris(@Param("uris") List<String> uris,
                                            @Param("start") LocalDateTime start,
                                            @Param("end") LocalDateTime end);
 
     @Query("""
-            SELECT NEW ru.practicum.ewm.dto.ViewStatsDto(eh.app, eh.uri, COUNT(eh.uri))
+            SELECT NEW ru.practicum.ewm.dto.ViewStatsDto(eh.app, eh.uri, COUNT(eh.ip))
             FROM EndpointHit AS eh
             WHERE eh.timestamp BETWEEN :start AND :end
             GROUP BY eh.app, eh.uri
-            ORDER BY COUNT(eh.uri) DESC
+            ORDER BY COUNT(eh.ip) DESC
             """)
     List<ViewStatsDto> findAllHitsWithoutUris(@Param("start") LocalDateTime start,
-                                           @Param("end") LocalDateTime end);
+                                              @Param("end") LocalDateTime end);
 
     @Query("""
             SELECT NEW ru.practicum.ewm.dto.ViewStatsDto(eh.app, eh.uri, COUNT(DISTINCT eh.ip))
@@ -42,8 +42,8 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
             ORDER BY COUNT(DISTINCT eh.ip) DESC
             """)
     List<ViewStatsDto> findAllHitsWithUniqueIpWithUris(@Param("uris") List<String> uris,
-                                                    @Param("start") LocalDateTime start,
-                                                    @Param("end") LocalDateTime end);
+                                                       @Param("start") LocalDateTime start,
+                                                       @Param("end") LocalDateTime end);
 
     @Query("""
             SELECT NEW ru.practicum.ewm.dto.ViewStatsDto(eh.app, eh.uri, COUNT(DISTINCT eh.ip))
@@ -53,5 +53,5 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
             ORDER BY COUNT(DISTINCT eh.ip) DESC
             """)
     List<ViewStatsDto> findAllHitsWithUniqueIpWithoutUris(@Param("start") LocalDateTime start,
-                                                       @Param("end") LocalDateTime end);
+                                                          @Param("end") LocalDateTime end);
 }

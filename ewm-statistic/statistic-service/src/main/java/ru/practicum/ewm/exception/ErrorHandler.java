@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 import java.util.MissingFormatArgumentException;
 
 @Slf4j
@@ -22,19 +26,27 @@ public class ErrorHandler {
             MissingRequestHeaderException.class,
             ValidationException.class
     })
-
-
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     public ApiError handleMethodArgumentNotValidException(final Exception e) {
-        log.error(e.getMessage());
-        return new ApiError(HttpStatus.BAD_REQUEST, "Validation exception occurred - invalid arguments: {}", e.getMessage());
+        log.error("Validation exception occurred - invalid arguments: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST.name(),
+                "Incorrectly made request.",
+                String.format("Validation exception occurred - invalid arguments: %s", e.getMessage()),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        );
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     public ApiError handleBadRequest(final BadRequestException e) {
-        log.error(e.getMessage());
-        return new ApiError(HttpStatus.BAD_REQUEST, "Bad request exception occurred: {}", e.getMessage());
+        log.error("Bad request exception occurred: {}", e.getMessage(), e);
+        return new ApiError(
+                String.valueOf(HttpStatus.BAD_REQUEST),
+                "Incorrectly made request.",
+                String.format("Bad request exception occurred: %s", e.getMessage()),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        );
     }
 
     @ExceptionHandler
@@ -44,6 +56,14 @@ public class ErrorHandler {
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         log.error(sw.toString());
-        return new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error occurred: {}", sw.toString());
+
+        List<String> errors = Collections.singletonList(e.getMessage());
+
+        return new ApiError(
+                HttpStatus.INTERNAL_SERVER_ERROR.name(),
+                "Internal server error occurred.",
+                e.getMessage(),
+                errors,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 }

@@ -22,7 +22,6 @@ public class EndpointHitDto {
     @NotBlank
     String uri;
     @NotBlank
-    @Pattern(regexp = "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")
     String ip;
     @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
