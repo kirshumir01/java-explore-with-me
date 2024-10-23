@@ -28,8 +28,6 @@ public class StatsServiceImpl implements StatsService {
             List<String> uris,
             boolean unique) {
 
-        System.out.println(uris);
-
         if (start.isAfter(end)) {
             throw new BadRequestException(String.format("End time %s is earlier than start time $s.", end, start));
         }
