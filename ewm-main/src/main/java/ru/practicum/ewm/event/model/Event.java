@@ -36,9 +36,6 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
-    @Builder.Default
-    @Column(name = "confirmed_requests")
-    private Integer confirmedRequests = 0;
     @CreationTimestamp
     @Column(name = "created_on")
     private LocalDateTime createdOn;
@@ -70,7 +67,4 @@ public class Event {
     @Column(name = "title", nullable = false)
     @Size(min = 3, max = 120)
     private String title;
-    @Builder.Default
-    @Column(name = "views")
-    private Long views = 0L;
 }

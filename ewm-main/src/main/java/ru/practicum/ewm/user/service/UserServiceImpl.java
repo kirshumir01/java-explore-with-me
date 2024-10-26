@@ -1,7 +1,6 @@
 package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public List<UserDto> adminGetAllUsersByIds(Set<Long> ids, int from, int size) {
-        Pageable page = PageRequest.of(from > 0 ? from / size : 0, size);
-
+    public List<UserDto> getAllUsersByIds(Set<Long> ids, Pageable page) {
         List<User> users;
 
         if (ids != null) {
@@ -45,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserDto adminCreateUser(NewUserRequest newUserRequest) {
+    public UserDto createUser(NewUserRequest newUserRequest) {
         Set<String> emails = userRepository.findAll().stream().map(User::getEmail).collect(Collectors.toSet());
 
         if (emails.contains(newUserRequest.getEmail())) {
@@ -57,7 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void adminDeleteUser(long userId) {
+    public void deleteUser(long userId) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format("User with id = %d not found", userId));
         }

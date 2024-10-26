@@ -3,6 +3,8 @@ package ru.practicum.ewm.user.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.user.dto.NewUserRequest;
@@ -27,7 +29,8 @@ public class AdminUserController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info("Main-service: received ADMIN request to GET all users by ID's: {}", ids);
-        List<UserDto> userDtoList = userService.adminGetAllUsersByIds(ids, from, size);
+        Pageable page = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<UserDto> userDtoList = userService.getAllUsersByIds(ids, page);
         log.info("Main-service: users received: {}", userDtoList);
         return userDtoList;
     }
@@ -36,7 +39,7 @@ public class AdminUserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserDto createUser(@Valid @RequestBody NewUserRequest newUserRequestDto) {
         log.info("Main-service: received ADMIN request to CREATE user: {}", newUserRequestDto);
-        UserDto createdUser = userService.adminCreateUser(newUserRequestDto);
+        UserDto createdUser = userService.createUser(newUserRequestDto);
         log.info("Main-service: user was created: {}", createdUser);
         return createdUser;
     }
@@ -45,7 +48,7 @@ public class AdminUserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable long userId) {
         log.info("Main-service: received ADMIN request to DELETE user with id: {}", userId);
-        userService.adminDeleteUser(userId);
+        userService.deleteUser(userId);
         log.info("Main-service: user was deleted");
     }
 }

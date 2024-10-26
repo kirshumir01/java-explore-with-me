@@ -3,6 +3,7 @@ package ru.practicum.ewm.event.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.controller.params.AdminEventRequestParams;
@@ -27,7 +28,8 @@ public class AdminEventsController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info("Main-service: received ADMIN request to GET all events. Predicate: {}", params.toString());
-        List<EventFullDto> events = eventService.adminGetAllEvents(params, from, size);
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<EventFullDto> events = eventService.getAllEvents(params, pageRequest);
         log.info("Main-service: events received: {}", events);
         return events;
     }
@@ -37,7 +39,7 @@ public class AdminEventsController {
     public EventFullDto updateEvent(@PathVariable long eventId,
                                     @Valid @RequestBody UpdateEventAdminRequest updateDto) {
         log.info("Main-service: received ADMIN request to UPDATE event by id = {}, updateDTO = {}", eventId, updateDto);
-        EventFullDto event = eventService.adminUpdateEventById(eventId, updateDto);
+        EventFullDto event = eventService.updateEventById(eventId, updateDto);
         log.info("Main-service: event received: {}", event);
         return event;
     }

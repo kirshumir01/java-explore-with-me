@@ -3,14 +3,17 @@ package ru.practicum.ewm.event.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.client.StatsClient;
+import ru.practicum.ewm.dto.EndpointHitCreateDto;
 import ru.practicum.ewm.event.controller.params.PublicEventRequestParams;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.service.EventService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -33,8 +36,15 @@ public class PublicEventsController {
         String path = request.getRequestURI();
         log.info("Main-service: received PUBLIC request to GET all events. Predicate: {}", params.toString());
         log.info("Main-service: PUBLIC logging data: client ip: {}, endpoint path: {}", ip, path);
-        List<EventShortDto> events = eventService.publicGetAllEvents(params, from, size, ip, path);
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<EventShortDto> events = eventService.getAllEvents(params, pageRequest);
         log.info("Main-service: events received: {}", events);
+        statsClient.saveHit(new EndpointHitCreateDto(
+                "ewm-main-service",
+                path,
+                ip,
+                LocalDateTime.now()));
+        log.info("Main-service: request to statsClient to save views statistic");
         return events;
     }
 
@@ -45,8 +55,15 @@ public class PublicEventsController {
         String path = request.getRequestURI();
         log.info("Main-service: received PUBLIC request to GET event by id = {}", eventId);
         log.info("Main-service: PUBLIC logging data: client ip: {}, endpoint path: {}", ip, path);
-        EventFullDto event = eventService.publicGetEventById(eventId, ip, path);
+        EventFullDto event = eventService.getEventById(eventId);
         log.info("Main-service: event received: {}", event);
+        statsClient.saveHit(new EndpointHitCreateDto(
+                "ewm-main-service",
+                path,
+                ip,
+                LocalDateTime.now()
+        ));
+        log.info("Main-service: request to statsClient to save views statistic");
         return event;
     }
 }

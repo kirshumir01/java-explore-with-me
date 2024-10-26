@@ -35,7 +35,7 @@ public class ErrorHandler {
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     public ApiError handleMethodArgumentNotValidException(final Exception e) {
-        log.error("Validation exception occurred - invalid arguments: {}", e.getMessage(), e);
+        log.info("Validation exception occurred - invalid arguments: {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.BAD_REQUEST.name(),
                 "Incorrectly made request.",
@@ -49,7 +49,7 @@ public class ErrorHandler {
     public ApiError handleConstraintViolentException(final ConstraintViolationException e) {
         return e.getConstraintViolations().stream()
                 .map((constraintViolation -> {
-                    log.error("Constraint violent exception occurred. {}: {}",
+                    log.info("Constraint violent exception occurred. {}: {}",
                             constraintViolation.getPropertyPath(), constraintViolation.getMessage());
                     return new ApiError(
                             HttpStatus.BAD_REQUEST.name(),
@@ -66,7 +66,7 @@ public class ErrorHandler {
     @ExceptionHandler(EventDateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     public ApiError handleEventDateExceptionException(final EventDateException e) {
-        log.error("Event date exception occurred: {}", e.getMessage(), e);
+        log.info("Event date exception occurred: {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "The event time does not meet the established criteria.",
@@ -77,7 +77,7 @@ public class ErrorHandler {
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT) // 409
     public ApiError handleConflictException(final ConflictException e) {
-        log.error("Conflict data exception occurred: {}", e.getMessage(), e);
+        log.info("Conflict data exception occurred: {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "Conflict data exception occurred.",
@@ -88,7 +88,7 @@ public class ErrorHandler {
     @ExceptionHandler(HibernateError.class)
     @ResponseStatus(HttpStatus.CONFLICT) // 409
     public ApiError handleSQLException(final HibernateError e) {
-        log.error("SQL exception occurred: {}", e.getMessage(), e);
+        log.info("SQL exception occurred: {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "SQL exception occurred.",
@@ -99,7 +99,7 @@ public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND) // 404
     public ApiError handleNotFoundException(final NotFoundException e) {
-        log.error("The required object was not found: {}", e.getMessage(), e);
+        log.info("The required object was not found: {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.NOT_FOUND.name(),
                 "The required object was not found.",

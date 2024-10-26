@@ -22,7 +22,7 @@ public class PrivateRequestController {
     @ResponseStatus(HttpStatus.OK)
     public List<ParticipationRequestDto> getAllRequests(@PathVariable long userId) {
         log.info("Main-service: received PRIVATE request to get all requests by user id: {}", userId);
-        List<ParticipationRequestDto> requests = requestService.privateGetAllRequests(userId);
+        List<ParticipationRequestDto> requests = requestService.getAllRequests(userId);
         log.info("Main-service: requests received: {}", requests);
         return requests;
     }
@@ -33,7 +33,7 @@ public class PrivateRequestController {
             @PathVariable long userId,
             @RequestParam long eventId) {
         log.info("Main-service: received PRIVATE request to CREATE request by user id = {} to event id = {}", userId, eventId);
-        ParticipationRequestDto createdRequest = requestService.privateCreateRequest(userId, eventId);
+        ParticipationRequestDto createdRequest = requestService.createRequest(userId, eventId);
         log.info("Main-service: requests created: {}", createdRequest);
         return createdRequest;
     }
@@ -44,7 +44,7 @@ public class PrivateRequestController {
             @PathVariable long userId,
             @PathVariable long requestId) {
         log.info("Main-service: received PRIVATE request to CANCEL request with id = {}", requestId);
-        ParticipationRequestDto cancelledRequest = requestService.privateCancelRequest(userId, requestId);
+        ParticipationRequestDto cancelledRequest = requestService.cancelRequest(userId, requestId);
         log.info("Main-service: request cancelled: {}", cancelledRequest);
         return cancelledRequest;
     }
@@ -53,7 +53,7 @@ public class PrivateRequestController {
     @ResponseStatus(HttpStatus.OK)
     public List<ParticipationRequestDto> getRequestsByEvent(@PathVariable long eventId) {
         log.info("Main-service: received PRIVATE request to GET request by event id = {}", eventId);
-        List<ParticipationRequestDto> requests = requestService.privateGetRequestsByEventId(eventId);
+        List<ParticipationRequestDto> requests = requestService.getRequestsByEventId(eventId);
         log.info("Main-service: requests received: {}", requests);
         return requests;
     }
@@ -66,7 +66,7 @@ public class PrivateRequestController {
             @RequestBody EventRequestStatusUpdateRequest updateRequestDto
     ) {
         log.info("Main-service: received PRIVATE request to update request: {}", updateRequestDto);
-        EventRequestStatusUpdateResult updatedRequest = requestService.privateUpdateRequestByEventId(userId, eventId, updateRequestDto);
+        EventRequestStatusUpdateResult updatedRequest = requestService.updateRequestByEventId(userId, eventId, updateRequestDto);
         log.info("Main-service: request updated: {}", updatedRequest);
         return updatedRequest;
     }

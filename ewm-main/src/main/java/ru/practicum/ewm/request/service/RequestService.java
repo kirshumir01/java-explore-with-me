@@ -7,13 +7,13 @@ import ru.practicum.ewm.request.dto.ParticipationRequestDto;
 import java.util.List;
 
 public interface RequestService {
-    List<ParticipationRequestDto> privateGetAllRequests(long userId);
+    List<ParticipationRequestDto> getAllRequests(long userId);
 
-    ParticipationRequestDto privateCreateRequest(long userId, long eventId);
+    ParticipationRequestDto createRequest(long userId, long eventId);
 
-    ParticipationRequestDto privateCancelRequest(long userId, long requestId);
+    ParticipationRequestDto cancelRequest(long userId, long requestId);
 
-    List<ParticipationRequestDto> privateGetRequestsByEventId(long eventId);
+    List<ParticipationRequestDto> getRequestsByEventId(long eventId);
 
-    EventRequestStatusUpdateResult privateUpdateRequestByEventId(long userId, long eventId, EventRequestStatusUpdateRequest updateDto);
+    EventRequestStatusUpdateResult updateRequestByEventId(long userId, long eventId, EventRequestStatusUpdateRequest updateDto);
 }

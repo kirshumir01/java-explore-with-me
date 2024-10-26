@@ -1,7 +1,6 @@
 package ru.practicum.ewm.category.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryDto adminCreateCategory(NewCategoryDto newCategoryDto) {
+    public CategoryDto createCategory(NewCategoryDto newCategoryDto) {
         Set<String> categoryNames = categoryRepository.findAll().stream().map(Category::getName).collect(Collectors.toSet());
 
         if (categoryNames.contains(newCategoryDto.getName())) {
@@ -39,7 +38,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void adminDeleteCategory(long catId) {
+    public void deleteCategory(long catId) {
         if (!categoryRepository.existsById(catId)) {
             throw new NotFoundException(String.format("Category with id = %d not found", catId));
         }
@@ -52,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public CategoryDto adminUpdateCategory(CategoryDto updateDto) {
+    public CategoryDto updateCategory(CategoryDto updateDto) {
         Category categoryToUpdate = categoryRepository.findById(updateDto.getId())
                 .orElseThrow(() -> new NotFoundException(String.format("Category with id = %d not found", updateDto.getId())));
 
@@ -68,8 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> publicGetAllCategories(int from, int size) {
-        Pageable page = PageRequest.of(from > 0 ? from / size : 0, size);
+    public List<CategoryDto> getAllCategories(Pageable page) {
         List<Category> categories = categoryRepository.findAll(page).getContent();
 
         if (categories.isEmpty()) {
@@ -80,7 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto publicGetCategoryById(long catId) {
+    public CategoryDto getCategoryById(long catId) {
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException(String.format("Category with id = %d not found", catId)));
         return CategoryMapper.toCategoryDto(category);

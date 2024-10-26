@@ -24,7 +24,6 @@ public class RequestMapper {
 
         if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             requestStatus = RequestStatus.CONFIRMED;
-            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
         } else {
             requestStatus = RequestStatus.PENDING;
         }

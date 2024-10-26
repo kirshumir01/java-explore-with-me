@@ -20,7 +20,7 @@ public class AdminCategoriesController {
     @ResponseStatus(HttpStatus.CREATED)
     public CategoryDto createCategory(@Valid @RequestBody NewCategoryDto newCategoryDto) {
         log.info("Main-service: received ADMIN request to CREATE category: {}", newCategoryDto);
-        CategoryDto createCategory = categoryService.adminCreateCategory(newCategoryDto);
+        CategoryDto createCategory = categoryService.createCategory(newCategoryDto);
         log.info("Main-service: category was created: {}", createCategory);
         return createCategory;
     }
@@ -29,7 +29,7 @@ public class AdminCategoriesController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCategory(@PathVariable long catId) {
         log.info("Main-service: received ADMIN request to DELETE category with id: {}", catId);
-        categoryService.adminDeleteCategory(catId);
+        categoryService.deleteCategory(catId);
         log.info("Main-service: category was deleted");
     }
 
@@ -39,7 +39,7 @@ public class AdminCategoriesController {
                                       @Valid @RequestBody CategoryDto categoryDto) {
         log.info("Main-service: received ADMIN request to UPDATE category: {}", categoryDto);
         categoryDto.setId(catId);
-        CategoryDto updatedCategory = categoryService.adminUpdateCategory(categoryDto);
+        CategoryDto updatedCategory = categoryService.updateCategory(categoryDto);
         log.info("Main-service: category was updated");
         return updatedCategory;
     }

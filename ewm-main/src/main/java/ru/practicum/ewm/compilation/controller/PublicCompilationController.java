@@ -2,6 +2,7 @@ package ru.practicum.ewm.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
@@ -24,7 +25,8 @@ public class PublicCompilationController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info("Main-service: received PUBLIC request to GET all compilations with 'pinned' = '{}'", pinned);
-        List<CompilationDto> compilations = compilationService.publicGetAllCompilations(pinned, from, size);
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<CompilationDto> compilations = compilationService.getAllCompilations(pinned, pageRequest);
         log.info("Main-service: compilations received: {}", compilations);
         return compilations;
     }
@@ -33,7 +35,7 @@ public class PublicCompilationController {
     @ResponseStatus(HttpStatus.OK)
     public CompilationDto getCompilation(@PathVariable long compId) {
         log.info("Main-service: received PUBLIC request to GET compilation with id = {}", compId);
-        CompilationDto compilation = compilationService.publicGetCompilationById(compId);
+        CompilationDto compilation = compilationService.getCompilationById(compId);
         log.info("Main-service: compilation received: {}", compilation);
         return compilation;
     }

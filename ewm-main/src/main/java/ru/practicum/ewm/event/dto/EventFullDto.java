@@ -1,43 +1,48 @@
 package ru.practicum.ewm.event.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import ru.practicum.ewm.category.dto.CategoryDto;
+import lombok.experimental.SuperBuilder;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.location.dto.LocationDto;
-import ru.practicum.ewm.user.dto.UserShortDto;
 
 @Data
-@Builder
+@EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventFullDto {
-    private Long id;
-    @NotBlank
-    private String annotation;
-    @NotNull
-    private CategoryDto category;
-    private Integer confirmedRequests;
+public class EventFullDto extends EventShortDto {
     private String createdOn;
     private String description;
     @NotNull
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String eventDate;
-    @NotNull
-    private UserShortDto initiator;
-    @NotNull
     private LocationDto location;
-    private Boolean paid;
     private Integer participantLimit;
     private String publishedOn;
     private Boolean requestModeration;
     private EventState state;
-    @NotBlank
-    private String title;
-    private Long views;
+
+    public EventFullDto(EventShortDto eventShortDto, String createdOn, String description,
+                        LocationDto location, Integer participantLimit, String publishedOn,
+                        Boolean requestModeration, EventState state) {
+        super(eventShortDto.getId(),
+              eventShortDto.getAnnotation(),
+              eventShortDto.getCategory(),
+              eventShortDto.getConfirmedRequests(),
+              eventShortDto.getEventDate(),
+              eventShortDto.getInitiator(),
+              eventShortDto.getPaid(),
+              eventShortDto.getTitle(),
+              eventShortDto.getViews()
+        );
+        this.createdOn = createdOn;
+        this.description = description;
+        this.location = location;
+        this.participantLimit = participantLimit;
+        this.publishedOn = publishedOn;
+        this.requestModeration = requestModeration;
+        this.state = state;
+    }
 }

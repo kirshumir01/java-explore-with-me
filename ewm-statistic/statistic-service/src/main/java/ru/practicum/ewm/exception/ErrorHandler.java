@@ -30,7 +30,7 @@ public class ErrorHandler {
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     public ApiError handleMethodArgumentNotValidException(final Exception e) {
-        log.error("Validation exception occurred - invalid arguments: {}", e.getMessage(), e);
+        log.info("Validation exception occurred - invalid arguments: {}", e.getMessage(), e);
         return new ApiError(
                 HttpStatus.BAD_REQUEST.name(),
                 "Incorrectly made request.",
@@ -42,7 +42,7 @@ public class ErrorHandler {
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST) // 400
     public ApiError handleBadRequest(final BadRequestException e) {
-        log.error("Bad request exception occurred: {}", e.getMessage(), e);
+        log.info("Bad request exception occurred: {}", e.getMessage(), e);
         return new ApiError(
                 String.valueOf(HttpStatus.BAD_REQUEST),
                 "Incorrectly made request.",

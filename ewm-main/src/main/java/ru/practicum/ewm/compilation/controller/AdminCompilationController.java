@@ -21,7 +21,7 @@ public class AdminCompilationController {
     @ResponseStatus(HttpStatus.CREATED)
     public CompilationDto createCompilation(@Valid @RequestBody NewCompilationDto createDto) {
         log.info("Main-service: received ADMIN request to CREATE compilation: {}", createDto);
-        CompilationDto createdCompilation = compilationService.adminCreateCompilation(createDto);
+        CompilationDto createdCompilation = compilationService.createCompilation(createDto);
         log.info("Main-service: compilation created: {}", createdCompilation);
         return createdCompilation;
     }
@@ -30,7 +30,7 @@ public class AdminCompilationController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompilation(@PathVariable(name = "compId") long compId) {
         log.info("Main-service: received ADMIN request to DELETE compilation with id = {}", compId);
-        compilationService.adminDeleteCompilation(compId);
+        compilationService.deleteCompilation(compId);
         log.info("Main-service: compilation deleted");
     }
 
@@ -39,7 +39,7 @@ public class AdminCompilationController {
     public CompilationDto updateCompilation(@PathVariable(name = "compId") long compId,
                                              @Valid @RequestBody UpdateCompilationRequest updateDto) {
         log.info("Main-service: received ADMIN request to UPDATE compilation: {}", updateDto);
-        CompilationDto updatedCompilation = compilationService.adminUpdateCompilation(compId, updateDto);
+        CompilationDto updatedCompilation = compilationService.updateCompilation(compId, updateDto);
         log.info("Main-service: compilation updated: {}", updatedCompilation);
         return updatedCompilation;
     }

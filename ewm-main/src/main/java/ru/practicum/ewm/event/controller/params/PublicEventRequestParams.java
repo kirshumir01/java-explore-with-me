@@ -1,7 +1,6 @@
 package ru.practicum.ewm.event.controller.params;
 
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Predicate;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -33,7 +32,7 @@ public class PublicEventRequestParams {
         EVENT_DATE, VIEWS
     }
 
-    public Predicate getPredicate() {
+    public BooleanBuilder getBuilder() {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (text != null && !text.isBlank()) {
@@ -49,12 +48,6 @@ public class PublicEventRequestParams {
             builder.and(QEvent.event.paid.eq(paid));
         }
 
-        if (onlyAvailable != null) {
-            if (onlyAvailable) {
-                builder.and(QEvent.event.participantLimit.ne(QEvent.event.confirmedRequests));
-            }
-        }
-
         if (rangeStart != null && rangeEnd != null) {
             builder.and(QEvent.event.eventDate.between(rangeStart, rangeEnd));
         } else if (rangeStart == null && rangeEnd == null) {
@@ -63,7 +56,7 @@ public class PublicEventRequestParams {
 
         builder.and(QEvent.event.state.eq(EventState.PUBLISHED));
 
-        return builder.getValue();
+        return builder;
     }
 
     public Sort getSort() {

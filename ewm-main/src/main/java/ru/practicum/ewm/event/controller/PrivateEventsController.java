@@ -3,6 +3,7 @@ package ru.practicum.ewm.event.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.EventFullDto;
@@ -28,7 +29,8 @@ public class PrivateEventsController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.info("Main-service: received PRIVATE request to GET all events by user id: {}", userId);
-        List<EventShortDto> events = eventService.privateGetAllEventsByUserId(userId, from, size);
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        List<EventShortDto> events = eventService.getAllEventsByUserId(userId, pageRequest);
         log.info("Main-service: events received: {}", events);
         return events;
     }
@@ -39,7 +41,7 @@ public class PrivateEventsController {
             @PathVariable long userId,
             @Valid @RequestBody NewEventDto newEventDto) {
         log.info("Main-service: received PRIVATE request to CREATE event by user: {}", newEventDto);
-        EventFullDto createdEvent = eventService.privateCreateEvent(userId, newEventDto);
+        EventFullDto createdEvent = eventService.createEvent(userId, newEventDto);
         log.info("Main-service: event created: {}", createdEvent);
         return createdEvent;
     }
@@ -50,7 +52,7 @@ public class PrivateEventsController {
             @PathVariable long userId,
             @PathVariable long eventId) {
         log.info("Main-service: received PRIVATE request to GET event by event id = {} and user id = {}", eventId, userId);
-        EventFullDto receivedEvent = eventService.privateGetEventByIdAndUserId(userId, eventId);
+        EventFullDto receivedEvent = eventService.getEventByIdAndUserId(userId, eventId);
         log.info("Main-service: event received: {}", receivedEvent);
         return receivedEvent;
     }
@@ -63,7 +65,7 @@ public class PrivateEventsController {
             @Valid @RequestBody UpdateEventUserRequest updateDto
     ) {
         log.info("Main-service: received PRIVATE request to UPDATE event: {}", updateDto);
-        EventFullDto updatedEvent = eventService.privateUpdateEventById(userId, eventId, updateDto);
+        EventFullDto updatedEvent = eventService.updateEventById(userId, eventId, updateDto);
         log.info("Main-service: event updated: {}", updatedEvent);
         return updatedEvent;
     }
