@@ -1,16 +1,14 @@
 package ru.practicum.ewm.event.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import ru.practicum.ewm.event.model.EventState;
 import ru.practicum.ewm.location.dto.LocationDto;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor

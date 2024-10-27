@@ -15,6 +15,7 @@ import ru.practicum.ewm.compilation.model.QCompilation;
 import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.dto.ViewStatsDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
+import ru.practicum.ewm.event.dto.RequestCount;
 import ru.practicum.ewm.event.mapper.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
@@ -24,10 +25,8 @@ import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.repository.RequestRepository;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,7 +49,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation savedCompilation = compilationRepository
                 .save(CompilationMapper.toCompilation(newCompilationDto, events));
 
-        List<Request> confirmedRequests = getConfirmedRequests(events.stream().toList());
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events.stream().toList());
         List<ViewStatsDto> stats = getViewsStats(events.stream().toList());
 
         Set<EventShortDto> eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events.stream().toList(), confirmedRequests, stats));
@@ -67,7 +66,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public CompilationDto updateCompilation(long compId, UpdateCompilationRequest updateDto) {
-        Compilation compilationToUpdate = compilationRepository.findById(compId)
+        Compilation compilationToUpdate = compilationRepository.findByIdWithEvents(compId)
                 .orElseThrow(() -> new NotFoundException(String.format("Compilation with id = %d not found", compId)));
 
         if (updateDto.getEvents() != null) {
@@ -85,7 +84,7 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation updatedCompilation = compilationRepository.save(compilationToUpdate);
 
         List<Event> events = updatedCompilation.getEvents().stream().toList();
-        List<Request> confirmedRequests = getConfirmedRequests(events);
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events.stream().toList());
         List<ViewStatsDto> stats = getViewsStats(events);
 
         Set<EventShortDto> eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events, confirmedRequests, stats));
@@ -113,7 +112,7 @@ public class CompilationServiceImpl implements CompilationService {
         return compilations.stream()
                 .map(compilation -> {
                     List<Event> events = compilation.getEvents().stream().toList();
-                    List<Request> confirmedRequests = getConfirmedRequests(events);
+                    List<RequestCount> confirmedRequests = getConfirmedRequests(events);
                     List<ViewStatsDto> stats = getViewsStats(events);
                     Set<EventShortDto> eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events, confirmedRequests, stats));
                     return CompilationMapper.toCompilationDto(compilation, eventShortDtoSet);
@@ -122,11 +121,11 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto getCompilationById(long compId) {
-        Compilation compilation = compilationRepository.findById(compId)
+        Compilation compilation = compilationRepository.findByIdWithEvents(compId)
                 .orElseThrow(() -> new NotFoundException(String.format("Compilation with id = %d not found", compId)));
 
         List<Event> events = compilation.getEvents().stream().toList();
-        List<Request> confirmedRequests = getConfirmedRequests(events);
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events.stream().toList());
         List<ViewStatsDto> stats = getViewsStats(events);
 
         Set<EventShortDto> eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events, confirmedRequests, stats));
@@ -144,8 +143,18 @@ public class CompilationServiceImpl implements CompilationService {
         return statsClient.getStats(start, LocalDateTime.now(), uris, true);
     }
 
-    private List<Request> getConfirmedRequests(List<Event> events) {
+    private List<RequestCount> getConfirmedRequests(List<Event> events) {
         List<Long> eventIds = events.stream().map(Event::getId).toList();
-        return requestRepository.findAllByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
+        List<Request> confirmedRequests = requestRepository.findAllByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
+
+        Map<Long, Long> requestCountMap = confirmedRequests.stream()
+                .collect(Collectors.groupingBy(
+                        request -> request.getEvent().getId(),
+                        Collectors.counting()
+                ));
+
+        return requestCountMap.entrySet().stream()
+                .map(entry -> new RequestCount(entry.getKey(), entry.getValue().intValue()))
+                .toList();
     }
 }

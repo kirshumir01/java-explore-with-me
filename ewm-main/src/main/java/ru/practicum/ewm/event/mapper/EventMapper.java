@@ -5,10 +5,10 @@ import ru.practicum.ewm.dto.ViewStatsDto;
 import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
+import ru.practicum.ewm.event.dto.RequestCount;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.exception.URIFormatException;
 import ru.practicum.ewm.location.mapper.LocationMapper;
-import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.user.dto.UserShortDto;
 
 import java.time.format.DateTimeFormatter;
@@ -19,22 +19,15 @@ import java.util.stream.Collectors;
 
 public class EventMapper {
     public static EventShortDto toEventShortDto(Event event,
-                                                List<Request> requests,
+                                                int confirmedRequestsCount,
                                                 List<ViewStatsDto> stats) {
-        Long views = getEventViewsStatistic(List.of(event), stats).get(event.getId());
-        Integer confirmedRequests;
-
-        if (requests == null || requests.isEmpty()) {
-            confirmedRequests = 0;
-        } else {
-            confirmedRequests = getConfirmedRequests(requests).get(event.getId());
-        }
+        long views = getEventViewsStatistic(List.of(event), stats).getOrDefault(event.getId(), 0L);
 
         return EventShortDto.builder()
                 .id(event.getId())
                 .annotation(event.getAnnotation())
                 .category(CategoryDto.builder().id(event.getCategory().getId()).build())
-                .confirmedRequests(confirmedRequests)
+                .confirmedRequests(confirmedRequestsCount)
                 .eventDate(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(event.getEventDate()))
                 .initiator(UserShortDto.builder().id(event.getInitiator().getId()).build())
                 .paid(event.getPaid())
@@ -44,18 +37,21 @@ public class EventMapper {
     }
 
     public static List<EventShortDto> toEventShortDtoList(List<Event> events,
-                                      List<Request> confirmedRequests,
+                                      List<RequestCount> confirmedRequests,
                                       List<ViewStatsDto> stats) {
+        Map<Long, Integer> requestCountMap = mapRequestCounts(confirmedRequests);
+
         return events.stream()
                 .map(event -> {
-                    return toEventShortDto(event, confirmedRequests, stats);
+                    int confirmedRequestsCount = requestCountMap.getOrDefault(event.getId(), 0);
+                    return toEventShortDto(event, confirmedRequestsCount, stats);
         }).toList();
     }
 
     public static EventFullDto toEventFullDto(Event event,
-                                              List<Request> confirmedRequests,
+                                              int confirmedRequestsCount,
                                               List<ViewStatsDto> stats) {
-        EventShortDto eventShortDto = toEventShortDto(event, confirmedRequests, stats);
+        EventShortDto eventShortDto = toEventShortDto(event, confirmedRequestsCount, stats);
 
         String publishedOn;
         if (event.getPublishedOn() != null) {
@@ -77,13 +73,15 @@ public class EventMapper {
     }
 
     public static List<EventFullDto> toEventFullDtoList(List<Event> events,
-                                                        List<Request> confirmedRequests,
+                                                        List<RequestCount> confirmedRequests,
                                                         List<ViewStatsDto> stats) {
+        Map<Long, Integer> requestCountMap = mapRequestCounts(confirmedRequests);
+
         return events.stream()
                 .map(event -> {
-                    return toEventFullDto(event, confirmedRequests, stats);
+                    int confirmedRequestsCount = requestCountMap.getOrDefault(event.getId(), 0);
+                    return toEventFullDto(event, confirmedRequestsCount, stats);
         }).toList();
-
     }
 
     public static Event toEvent(NewEventDto newEventDto) {
@@ -122,11 +120,8 @@ public class EventMapper {
         return viewsMap;
     }
 
-    private static Map<Long, Integer> getConfirmedRequests(List<Request> confirmedRequests) {
-        return confirmedRequests.stream()
-                .collect(Collectors.groupingBy(
-                        request -> request.getEvent().getId(),
-                        Collectors.collectingAndThen(Collectors.counting(), Long::intValue)
-                ));
+    private static Map<Long, Integer> mapRequestCounts(List<RequestCount> requestCounts) {
+        return requestCounts.stream()
+                .collect(Collectors.toMap(RequestCount::getEventId, RequestCount::getCount));
     }
 }

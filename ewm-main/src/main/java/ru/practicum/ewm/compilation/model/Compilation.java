@@ -13,11 +13,6 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@NamedEntityGraph(name = "compilation-events",
-        attributeNodes = @NamedAttributeNode(value = "events", subgraph = "event-user-category"),
-        subgraphs = @NamedSubgraph(name = "event-user-category",
-                attributeNodes = {@NamedAttributeNode("initiator"), @NamedAttributeNode("category")})
-)
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

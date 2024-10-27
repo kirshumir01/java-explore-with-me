@@ -32,10 +32,8 @@ import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,15 +48,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllEventsByUserId(long userId, PageRequest pageRequest) {
         Predicate predicate = QEvent.event.initiator.id.eq(userId);
-        List<Event> events = eventRepository.findAll(predicate, pageRequest).getContent();
+        List<Event> events = eventRepository.findAllSliced(QEvent.event, predicate, pageRequest).getContent();
 
         if (events.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Request> confirmedRequests = getConfirmedRequests(events);
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events);
         List<ViewStatsDto> stats = getViewsStats(events);
-
 
         return EventMapper.toEventShortDtoList(events, confirmedRequests, stats);
     }
@@ -89,12 +86,12 @@ public class EventServiceImpl implements EventService {
         event.setCategory(category);
         event.setState(EventState.PENDING);
         event.setLocation(location);
-        List<Request> confirmedRequests = new ArrayList<>();
+        int confirmedRequestsCount = 0;
         List<ViewStatsDto> stats = new ArrayList<>();
 
         Event savedEvent = eventRepository.save(event);
 
-        return EventMapper.toEventFullDto(savedEvent, confirmedRequests, stats);
+        return EventMapper.toEventFullDto(savedEvent, confirmedRequestsCount, stats);
     }
 
     @Override
@@ -110,10 +107,10 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException(String.format("User with id = %d is not initiator of the event", userId));
         }
 
-        List<Request> confirmedRequests = getConfirmedRequests(List.of(event));
+        int confirmedRequestsCount = requestRepository.countByEventIdsAndStatus(eventId, RequestStatus.CONFIRMED);
         List<ViewStatsDto> stats = getViewsStats(List.of(event));
 
-        return EventMapper.toEventFullDto(event, confirmedRequests, stats);
+        return EventMapper.toEventFullDto(event, confirmedRequestsCount, stats);
     }
 
     @Override
@@ -139,10 +136,10 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepository.save(eventToUpdate);
 
-        List<Request> confirmedRequests = getConfirmedRequests(List.of(updatedEvent));
+        int confirmedRequestsCount = requestRepository.countByEventIdsAndStatus(eventId, RequestStatus.CONFIRMED);
         List<ViewStatsDto> stats = getViewsStats(List.of(updatedEvent));
 
-        return EventMapper.toEventFullDto(updatedEvent, confirmedRequests, stats);
+        return EventMapper.toEventFullDto(updatedEvent, confirmedRequestsCount, stats);
     }
 
     @Override
@@ -150,16 +147,16 @@ public class EventServiceImpl implements EventService {
         List<Event> events;
 
         if (Objects.nonNull(params.getPredicate())) {
-            events = eventRepository.findAll(params.getPredicate(), pageRequest).getContent();
+            events = eventRepository.findAllSliced(QEvent.event, params.getPredicate(), pageRequest).getContent();
         } else {
-            events = eventRepository.findAll(pageRequest).getContent();
+            events = eventRepository.findAllSliced(null, null, pageRequest).getContent();
         }
 
         if (events.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Request> confirmedRequests = getConfirmedRequests(events);
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events);
         List<ViewStatsDto> stats = getViewsStats(events);
 
         return EventMapper.toEventFullDtoList(events, confirmedRequests, stats);
@@ -194,10 +191,10 @@ public class EventServiceImpl implements EventService {
 
         Event updatedEvent = eventRepository.save(eventToUpdate);
 
-        List<Request> confirmedRequests = getConfirmedRequests(List.of(eventToUpdate));
+        int confirmedRequestsCount = requestRepository.countByEventIdsAndStatus(eventId, RequestStatus.CONFIRMED);
         List<ViewStatsDto> stats = getViewsStats(List.of(eventToUpdate));
 
-        return EventMapper.toEventFullDto(updatedEvent, confirmedRequests, stats);
+        return EventMapper.toEventFullDto(updatedEvent, confirmedRequestsCount, stats);
     }
 
     @Override
@@ -217,13 +214,14 @@ public class EventServiceImpl implements EventService {
         }
 
         assert builder.getValue() != null;
-        List<Event> events = eventRepository.findAll(builder.getValue(), pageRequest.withSort(params.getSort())).getContent();
+        List<Event> events = eventRepository
+                .findAllSliced(QEvent.event, builder.getValue(), pageRequest.withSort(params.getSort())).getContent();
 
         if (events.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<Request> confirmedRequests = getConfirmedRequests(events);
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events);
         List<ViewStatsDto> stats = getViewsStats(events);
 
         return EventMapper.toEventShortDtoList(events, confirmedRequests, stats);
@@ -236,11 +234,10 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findOne(conditions)
                 .orElseThrow(() -> new NotFoundException(String.format("Event with id = %d not found", eventId)));
 
-        // int confirmedRequestsCount = requestRepository.countByEventIdsAndStatus(eventId, RequestStatus.CONFIRMED);
-        List<Request> confirmedRequests = getConfirmedRequests(List.of(event));
+        int confirmedRequestsCount = requestRepository.countByEventIdsAndStatus(eventId, RequestStatus.CONFIRMED);
         List<ViewStatsDto> stats = getViewsStats(List.of(event));
 
-        return EventMapper.toEventFullDto(event, confirmedRequests, stats);
+        return EventMapper.toEventFullDto(event, confirmedRequestsCount, stats);
     }
 
     private void validateUpdateEventRequest(UpdateEventDto updateDto, Event event) {
@@ -316,8 +313,18 @@ public class EventServiceImpl implements EventService {
         return statsClient.getStats(start, LocalDateTime.now(), uris, true);
     }
 
-    private List<Request> getConfirmedRequests(List<Event> events) {
+    private List<RequestCount> getConfirmedRequests(List<Event> events) {
         List<Long> eventIds = events.stream().map(Event::getId).toList();
-        return requestRepository.findAllByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
+        List<Request> confirmedRequests = requestRepository.findAllByEventIdsAndStatus(eventIds, RequestStatus.CONFIRMED);
+
+        Map<Long, Long> requestCountMap = confirmedRequests.stream()
+                .collect(Collectors.groupingBy(
+                        request -> request.getEvent().getId(),
+                        Collectors.counting()
+                ));
+
+        return requestCountMap.entrySet().stream()
+                .map(entry -> new RequestCount(entry.getKey(), entry.getValue().intValue()))
+                .toList();
     }
 }
