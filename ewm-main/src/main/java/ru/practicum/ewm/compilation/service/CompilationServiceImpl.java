@@ -2,6 +2,7 @@ package ru.practicum.ewm.compilation.service;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
@@ -40,19 +42,20 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional
     public CompilationDto createCompilation(NewCompilationDto newCompilationDto) {
         Set<Event> events = new HashSet<>();
+        List<RequestCount> confirmedRequests = new ArrayList<>();
+        List<ViewStatsDto> stats = new ArrayList<>();
+        Set<EventShortDto> eventShortDtoSet = new HashSet<>();
 
         if (newCompilationDto.getEvents() != null) {
             Set<Long> eventsIds = newCompilationDto.getEvents();
             events = new HashSet<>(eventRepository.findAllById(eventsIds));
+            confirmedRequests = getConfirmedRequests(events.stream().toList());
+            stats = getViewsStats(events.stream().toList());
+            eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events.stream().toList(), confirmedRequests, stats));
         }
 
         Compilation savedCompilation = compilationRepository
                 .save(CompilationMapper.toCompilation(newCompilationDto, events));
-
-        List<RequestCount> confirmedRequests = getConfirmedRequests(events.stream().toList());
-        List<ViewStatsDto> stats = getViewsStats(events.stream().toList());
-
-        Set<EventShortDto> eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events.stream().toList(), confirmedRequests, stats));
 
         return CompilationMapper.toCompilationDto(savedCompilation, eventShortDtoSet);
     }
@@ -109,14 +112,39 @@ public class CompilationServiceImpl implements CompilationService {
             return Collections.emptyList();
         }
 
-        return compilations.stream()
+        List<Object[]> results = compilationRepository.findAllCompilationEventPairs();
+
+        Map<Long, List<Long>> eventsIdByCompilationId = results.stream()
+                .collect(Collectors.groupingBy(
+                        row -> (Long.parseLong(row[0].toString())),
+                        Collectors.mapping(
+                                row -> (Long.parseLong(row[1].toString())),
+                                Collectors.toList()
+                        )
+                ));
+
+        Set<Long> allEventsIds = eventsIdByCompilationId.values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+
+        List<Event> events = eventRepository.findAllByIdIn(allEventsIds);
+
+        Map<Long, Set<Event>> eventsByCompilation = events.stream()
+                .collect(Collectors.groupingBy(
+                        event -> findCompilationIdForEvent(event.getId(), eventsIdByCompilationId),
+                        Collectors.toSet()
+                ));
+
+        return  compilations.stream()
                 .map(compilation -> {
-                    List<Event> events = compilation.getEvents().stream().toList();
-                    List<RequestCount> confirmedRequests = getConfirmedRequests(events);
-                    List<ViewStatsDto> stats = getViewsStats(events);
-                    Set<EventShortDto> eventShortDtoSet = new HashSet<>(EventMapper.toEventShortDtoList(events, confirmedRequests, stats));
+                    Set<EventShortDto> eventShortDtoSet = new HashSet<>();
+                    if (!eventsByCompilation.containsKey(compilation.getId())) {
+                        return CompilationMapper.toCompilationDto(compilation, eventShortDtoSet);
+                    }
+                    eventShortDtoSet = getEventShortDtoSet(compilation);
                     return CompilationMapper.toCompilationDto(compilation, eventShortDtoSet);
-                }).toList();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -156,5 +184,21 @@ public class CompilationServiceImpl implements CompilationService {
         return requestCountMap.entrySet().stream()
                 .map(entry -> new RequestCount(entry.getKey(), entry.getValue().intValue()))
                 .toList();
+    }
+
+    private Long findCompilationIdForEvent(long eventId, Map<Long, List<Long>> eventsIdByCompilationId) {
+        return eventsIdByCompilationId.entrySet().stream()
+                .filter(entry -> entry.getValue().contains(eventId))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Set<EventShortDto> getEventShortDtoSet(Compilation compilation) {
+        List<Event> events = compilation.getEvents().stream().toList();
+        List<RequestCount> confirmedRequests = getConfirmedRequests(events);
+        List<ViewStatsDto> stats = getViewsStats(events);
+        List<EventShortDto> eventShortDtoList = EventMapper.toEventShortDtoList(events, confirmedRequests, stats);
+        return new HashSet<>(eventShortDtoList);
     }
 }
