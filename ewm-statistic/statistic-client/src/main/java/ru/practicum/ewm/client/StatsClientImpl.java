@@ -27,23 +27,18 @@ public class StatsClientImpl implements StatsClient {
 
     @Override
     public void saveHit(EndpointHitCreateDto endpointHitCreateDto) {
-        try {
-            log.debug("Statistic-client: sending POST request to /hit with payload: {}", endpointHitCreateDto);
-            ResponseEntity<String> response = restClient.post()
-                    .uri("/hit")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(endpointHitCreateDto)
-                    .retrieve()
-                    .toEntity(String.class);
+        log.debug("Statistic-client: sending POST request to /hit with payload: {}", endpointHitCreateDto);
+        ResponseEntity<String> response = restClient.post()
+                .uri("/hit")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(endpointHitCreateDto)
+                .retrieve()
+                .toEntity(String.class);
 
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                log.debug("Statistic-client: request to save hit has been proceed with error: {}", response.getBody());
-            } else {
-                log.info("Statistic-client: request to save hit was successful.");
-            }
-        } catch (Exception e) {
-            log.error("Statistic-client: exception occurred during request to save hit: ", e);
-            throw new RuntimeException("Statistic-client: failed to save hit", e);
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.debug("Statistic-client: request to save hit has been proceed with error: {}", response.getBody());
+        } else {
+            log.info("Statistic-client: request to save hit was successful.");
         }
     }
 
@@ -62,22 +57,18 @@ public class StatsClientImpl implements StatsClient {
                 .build()
                 .toUriString();
         log.debug("Statistic-client: sending GET request to {} with uniqueIp={}", uri, unique);
-        try {
-            ResponseEntity<List<ViewStatsDto>> response = restClient.get()
-                    .uri(uri)
-                    .retrieve()
-                    .toEntity(new ParameterizedTypeReference<List<ViewStatsDto>>() {});
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-                log.info("Statistic-client: request to get stats was successful.");
-                return response.getBody();
-            } else {
-                log.debug("Statistic-client: request to get stats failed with status: {}", response.getStatusCode());
-                return Collections.emptyList();
-            }
-        } catch (Exception e) {
-            log.error("Statistic-client: exception occurred during request to get stats: ", e);
-            throw new RuntimeException("Failed to get stats", e);
+        ResponseEntity<List<ViewStatsDto>> response = restClient.get()
+                .uri(uri)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<ViewStatsDto>>() {});
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            log.info("Statistic-client: request to get stats was successful.");
+            return response.getBody();
+        } else {
+            log.debug("Statistic-client: request to get stats failed with status: {}", response.getStatusCode());
+            return Collections.emptyList();
         }
     }
 

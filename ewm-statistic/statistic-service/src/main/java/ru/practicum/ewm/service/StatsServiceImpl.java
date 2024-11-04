@@ -22,7 +22,11 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+    public List<ViewStatsDto> getStats(
+            LocalDateTime start,
+            LocalDateTime end,
+            List<String> uris,
+            boolean unique) {
 
         if (start.isAfter(end)) {
             throw new BadRequestException(String.format("End time %s is earlier than start time $s.", end, start));

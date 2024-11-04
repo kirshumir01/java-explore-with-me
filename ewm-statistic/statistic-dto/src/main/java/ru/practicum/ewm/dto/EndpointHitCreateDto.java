@@ -24,7 +24,10 @@ public class EndpointHitCreateDto {
     @JsonProperty("uri")
     String uri;
     @NotBlank
-    @Pattern(regexp = "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")
+    // IPv4: 192.168.1.1
+    // IPv6: 0:0:0:0:0:0:0:1
+    // IPv6-short: ::1
+    @Pattern(regexp = "^(?:(?:\\d{1,3}\\.){3}\\d{1,3}|(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1|(?:[0-9a-fA-F]{1,4}:){1,7}:)$")
     @JsonProperty("ip")
     String ip;
     @NotNull
