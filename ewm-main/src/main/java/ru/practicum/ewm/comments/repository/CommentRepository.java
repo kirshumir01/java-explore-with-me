@@ -34,13 +34,13 @@ public interface CommentRepository extends
     Slice<Comment> findAllSliced(EntityPath path, Predicate predicate, Pageable page);
 
     @Query("""
-            SELECT c.id FROM Comment c 
+            SELECT c.id FROM Comment c
             WHERE c.parentCommentId = :parentId
             """)
     Set<Long> findAllIdsByParentCommentId(@Param("parentId") Long parentCommentId);
 
     @Query("""
-            SELECT c FROM Comment c 
+            SELECT c FROM Comment c
             WHERE c.parentCommentId = :parentId
             """)
     List<Comment> findAllByParentCommentId(@Param("parentId") Long parentCommentId);
