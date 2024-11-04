@@ -62,7 +62,7 @@ public class Event {
     @Column(name = "request_moderation")
     private Boolean requestModeration = true;
     @Enumerated(EnumType.STRING)
-    @Column(name = "eventState")
+    @Column(name = "state")
     private EventState state;
     @Column(name = "title", nullable = false)
     @Size(min = 3, max = 120)
