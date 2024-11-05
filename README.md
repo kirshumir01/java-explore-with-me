@@ -1,7 +1,7 @@
 # java-explore-with-me
 
 ## ЧАСТЬ 3 - КОММЕНТАРИИ К СОБЫТИЯМ
-![PULL-REQUEST](https://github.com/kirshumir01/java-explore-with-me/pull/3)
+**PULL-REQUEST:** https://github.com/kirshumir01/java-explore-with-me/pull/3
 
 ### Дополнительная функциональности приложения разработана по следующим эндпоинтам:
 
@@ -44,4 +44,4 @@
 - в случае, если по заданным фильтрам не найдено ни одного комментария, возвращает пустой список.
 
 ### Схема базы данных приложения (ER-диаграмма)
-![ER-diagram](https://github.com/kirshumir01/java-explore-with-me/blob/main-svc/EWM-diagram.png)
+![ER-diagram](https://github.com/kirshumir01/java-explore-with-me/blob/feature_comments/EWM-diagram.png)
