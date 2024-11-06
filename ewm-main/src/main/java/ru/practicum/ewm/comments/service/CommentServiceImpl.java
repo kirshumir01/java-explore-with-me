@@ -67,6 +67,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentShortDto> getAllAuthorCommentsByEvent(long userId, long eventId, PageRequest pageRequest) {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format("User with id = %d not found", userId));
@@ -153,6 +154,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentDto> getAllComments(AdminCommentRequestParams params, PageRequest pageRequest) {
         if (params.getRangeStart() != null && params.getRangeEnd() != null) {
             if (params.getRangeStart().isAfter(params.getRangeEnd())) {
@@ -176,6 +178,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CommentDto getCommentById(long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NotFoundException(String.format("Comment with id = %d not found", commentId)));
@@ -218,6 +221,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CommentShortDto> getAllCommentsByEventId(PublicCommentRequestParams params,
                                                          PageRequest pageRequest,
                                                          long eventId) {

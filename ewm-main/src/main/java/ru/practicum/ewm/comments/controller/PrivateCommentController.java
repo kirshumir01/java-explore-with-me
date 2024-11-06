@@ -1,10 +1,13 @@
 package ru.practicum.ewm.comments.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comments.dto.CommentDto;
 import ru.practicum.ewm.comments.dto.CommentShortDto;
@@ -15,6 +18,7 @@ import ru.practicum.ewm.comments.service.CommentService;
 import java.util.List;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("users/{userId}/comments")
 @RequiredArgsConstructor
@@ -35,11 +39,10 @@ public class PrivateCommentController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     List<CommentShortDto> getAllAuthorCommentsByEvent(@PathVariable long userId,
                                                       @RequestParam long eventId,
-                                                      @RequestParam(defaultValue = "0") int from,
-                                                      @RequestParam(defaultValue = "10") int size) {
+                                                      @RequestParam(defaultValue = "0") @Min(0) int from,
+                                                      @RequestParam(defaultValue = "10") @Min(1) @Max(1000) int size) {
         log.info("Main-service: received PRIVATE request to GET author's comments by eventId id = {}", eventId);
         PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
         List<CommentShortDto> comments = commentService.getAllAuthorCommentsByEvent(userId, eventId, pageRequest);
@@ -48,7 +51,6 @@ public class PrivateCommentController {
     }
 
     @PatchMapping("/{commentId}")
-    @ResponseStatus(HttpStatus.OK)
     public CommentDto updateComment(@PathVariable long userId,
                                     @PathVariable long commentId,
                                     @Valid @RequestBody UpdateCommentDto updateDto) {

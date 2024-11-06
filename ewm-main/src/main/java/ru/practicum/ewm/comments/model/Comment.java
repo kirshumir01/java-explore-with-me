@@ -2,10 +2,7 @@ package ru.practicum.ewm.comments.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.ewm.user.model.User;
 
@@ -13,7 +10,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
-@Data
+@Getter
+@Setter
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,6 +26,7 @@ public class Comment {
     @Column(name = "text", nullable = false)
     @Size(min = 1, max = 1000)
     private String text;
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
@@ -51,6 +51,6 @@ public class Comment {
     @Column(name = "parent", nullable = false)
     private Boolean isParent = true;
     @Builder.Default
-    @Column(name = "parent_id", nullable = false)
+    @Column(name = "parent_id")
     private Long parentCommentId = null;
 }

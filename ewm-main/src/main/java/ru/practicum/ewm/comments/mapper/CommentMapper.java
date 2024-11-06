@@ -1,5 +1,6 @@
 package ru.practicum.ewm.comments.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.practicum.ewm.comments.dto.CommentDto;
 import ru.practicum.ewm.comments.dto.CommentShortDto;
 import ru.practicum.ewm.comments.dto.NewCommentDto;
@@ -10,14 +11,15 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class CommentMapper {
-    public static Comment toComment(NewCommentDto newCommentDto) {
+    public Comment toComment(NewCommentDto newCommentDto) {
         return Comment.builder()
                 .text(newCommentDto.getText())
                 .build();
     }
 
-    public static CommentDto toCommentDto(Comment comment) {
+    public CommentDto toCommentDto(Comment comment) {
         CommentShortDto commentShortDto = CommentMapper.toCommentShortDto(comment);
 
         String edited;
@@ -39,11 +41,11 @@ public class CommentMapper {
         );
     }
 
-    public static List<CommentDto> toCommentDtoList(List<Comment> comments) {
+    public List<CommentDto> toCommentDtoList(List<Comment> comments) {
         return comments.stream().map(CommentMapper::toCommentDto).toList();
     }
 
-    public static CommentShortDto toCommentShortDto(Comment comment) {
+    public CommentShortDto toCommentShortDto(Comment comment) {
         return CommentShortDto.builder()
                 .id(comment.getId())
                 .text(comment.getText())
@@ -53,7 +55,7 @@ public class CommentMapper {
                 .build();
     }
 
-    public static List<CommentShortDto> toCommentShortDtoList(List<Comment> comments) {
+    public List<CommentShortDto> toCommentShortDtoList(List<Comment> comments) {
         return comments.stream().map(CommentMapper::toCommentShortDto).toList();
     }
 }
