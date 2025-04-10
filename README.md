@@ -12,7 +12,7 @@ ___
 
 Приложение - афиша событий - позволяет предложить какое-либо событие от выставки до похода в кино и собрать компанию для участия в нём.
 
-![](https://github.com/kirshumir01/java-explore-with-meblob/main/ewm-title.png)
+![](https://github.com/kirshumir01/java-explore-with-me/blob/main/ewm-title.png)
 
 ## Структура модулей приложения
 ___
@@ -23,11 +23,11 @@ ___
 
 Структура модулей и зависимостей представлена ниже в виде схемы.
 
-![](https://github.com/kirshumir01/java-explore-with-meblob/main/ewm-title.png)
+![](https://github.com/kirshumir01/java-explore-with-me/blob/main/project_structure.png)
 
 ### Спецификация API
-- [спецификация основного сервиса](https://github.com/kirshumir01/java-explore-with-meblob/main/ewm-main-service-spec.json);
-- [спецификация сервиса статистики](https://github.com/kirshumir01/java-explore-with-meblob/main/ewm-stats-service-spec.json).
+- [спецификация основного сервиса](https://github.com/kirshumir01/java-explore-with-me/blob/main/ewm-main-service-spec.json);
+- [спецификация сервиса статистики](https://github.com/kirshumir01/java-explore-with-me/blob/main/ewm-stats-service-spec.json).
 
 <br>
 
@@ -107,7 +107,7 @@ ___
 
 
 ### Схема базы данных приложения (ER-диаграмма)
-![ER-diagram](https://github.com/kirshumir01/java-explore-with-me/blob/EWM-diagram.png)
+![ER-diagram](https://github.com/kirshumir01/java-explore-with-me/blob/main/EWM-diagram.png)
 
 ## Инструменты и технологии
 ___
